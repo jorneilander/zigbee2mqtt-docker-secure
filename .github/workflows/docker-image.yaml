@@ -1,7 +1,10 @@
 name: Publish Home Assistant
 
+on: push
+
 jobs:
   lint_repository:
+    name: Lint repository files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -11,6 +14,7 @@ jobs:
         continue-on-error: true
 
   build_and_publish:
+    name: Build, scan & push images
     runs-on: ubuntu-latest
     steps:
       - name: Set vars
@@ -20,32 +24,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Docker BuildX
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
-        id: buildx
-        with:
-          install: true
-          buildkitd-flags: "--debug"
 
-      - name: Login to GitHub Container Registry
+      - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
-          registry: docker.pkg.github.com
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v2
         with:
           push: true
           tags: |
-            docker.pkg.github.com/${{ github.repository }}:${{ steps.vars.outputs.short_ref }}
+            failfr8er/zigbee2mqtt:${{ steps.vars.outputs.short_ref }}-amd64
 
       - name: Run Dive
         uses: yuichielectric/dive-action@0.0.4
         continue-on-error: true
         with:
-          image: "${{ github.repository }}:${{ steps.vars.outputs.short_ref }}"
+          image: failfr8er/zigbee2mqtt:${{ steps.vars.outputs.short_ref }}-amd64
           config-file: ${{ github.workspace }}/.dive-ci.yml
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-

@@ -1,0 +1,5 @@
+FROM koenkk/zigbee2mqtt:latest
+
+RUN adduser -G dialout -S -D -u ${Z2MQTT_UID} ${Z2MQTT_USER} && \
+    chown -R ${Z2MQTT_USER} /app
+USER zigbee2mqtt

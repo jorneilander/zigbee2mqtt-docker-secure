@@ -1,0 +1,19 @@
+[Unit]
+Description=Zigbee2MQTT
+
+[Service]
+SyslogIdentifier=zigbee2mqtt
+ExecStartPre=-/usr/bin/docker rm "zigbee2mqtt"
+ExecStart=docker run \
+    --name="zigbee2mqtt" \
+    --rm=true \
+    --volume="/etc/zigbee2mqtt/:/app/data" \
+		--volume="/run/udev:/run/udev:ro" \
+		--device=/dev/ttyACM0 \
+    --env TZ=${TIMEZONE} \
+    --dns=${DNS} \
+		--user="zigbee2mqtt" \
+		failfr8er/zigbee2mqtt
+
+[Install]
+WantedBy=multi-user.target
